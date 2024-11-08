@@ -65,17 +65,18 @@ nav {
         justify-content: start;
 
         li {
-            padding: 0 10px;
+            padding: 0 20px 0 0;
 
             a {
                 text-decoration: none;
-                color: var(--tertiary-color);
+                color: var(--font-color);
+                padding-bottom: 5px;
 
             }
 
-            a.current {
+            a:hover {
                 color: var(--font-color);
-                border-bottom: solid 1px var(--font-color);
+                border-bottom: solid 2px var(--font-color);
             }
         }
     }

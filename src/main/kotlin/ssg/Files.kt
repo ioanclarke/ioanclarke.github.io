@@ -3,12 +3,15 @@ package ssg
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.*
 import kotlin.system.exitProcess
 
 
 object Files {
 
-    val pagesDir: Path = Paths.get("").resolve("src/main/resources/pages")
+    val resourcesDir: Path = Paths.get("").resolve("src/main/resources")
+    val pagesDir: Path = Paths.get("").resolve( resourcesDir).resolve("pages")
+
     private val baseFile: Path = pagesDir.parent.resolve("base.html")
 
 
@@ -35,27 +38,44 @@ object Files {
         return file
     }
 
-    fun loadPageFiles(): List<File> {
-        val pagesDir = pagesDir.toFile()
+    @OptIn(ExperimentalPathApi::class)
+    fun loadPageFiles(): Sequence<Path> {
         if (!pagesDir.exists()) {
             println("$pagesDir not found")
             exitProcess(1)
         }
 
-        if (!pagesDir.isDirectory) {
+        if (!pagesDir.isDirectory()) {
             println("$pagesDir is not a directory")
             exitProcess(2)
         }
 
-        return pagesDir.listFiles()!!.toList()
+
+
+        return pagesDir.walk()
     }
 
-    fun createPublicDir(): File {
-        val publicDir = File("public")
-        if (!publicDir.exists()) {
-            println("Creating directory ${publicDir.absolutePath}")
-            publicDir.mkdir()
+    fun loadAssets(): List<Path> {
+        val paths = listOf("styles.css", "favicon.ico")
+            .map { resourcesDir.resolve(it) }
+
+        paths.forEach {
+            if (!it.exists()) {
+                println("$it not found")
+                exitProcess(5)
+            }
         }
-        return publicDir
+
+        return paths
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    fun createPublicDir(): Path {
+        val publicDir = Path("public")
+        if (publicDir.exists()) {
+            println("Deleting existing directory ${publicDir.toAbsolutePath()}")
+            publicDir.deleteRecursively()
+        }
+        return publicDir.createDirectory()
     }
 }
