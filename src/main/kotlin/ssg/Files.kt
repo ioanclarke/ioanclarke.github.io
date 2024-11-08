@@ -56,7 +56,7 @@ object Files {
     }
 
     fun loadAssets(): List<Path> {
-        val paths = listOf("styles.css", "favicon.ico")
+        val paths = listOf("styles.css", "favicon.ico", "404.html")
             .map { resourcesDir.resolve(it) }
 
         paths.forEach {
