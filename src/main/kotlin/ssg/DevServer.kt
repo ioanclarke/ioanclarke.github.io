@@ -8,15 +8,14 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
-import java.nio.file.FileSystems
-import java.nio.file.Path
+import java.nio.file.Files as JavaFiles
+import java.nio.file.*
 import java.nio.file.StandardWatchEventKinds.*
-import java.nio.file.WatchKey
-import java.nio.file.WatchService
+import java.nio.file.attribute.BasicFileAttributes
 
 
 fun main() {
-    watchFiles()
+//    watchFiles()
     embeddedServer(Netty, port = 8080) {
         routing {
             // Serve static files from the "static" directory
@@ -33,7 +32,7 @@ fun watchFiles() {
         val watchDir: Path = Files.pagesDir
         val watchService: WatchService = FileSystems.getDefault().newWatchService()
 
-        watchDir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY)
+        registerAll(watchDir, watchService)
 
         println("Watching directory: ${watchDir.toAbsolutePath()}")
 
@@ -49,13 +48,13 @@ fun watchFiles() {
 
                 val filePath = event.context() as Path
 
-                // Display event details
+                // TODO currently broken because it outputs 'File modified: /Users/ioan.clarke/workspace/hobby/my-ssg/index.html'
                 when (kind) {
-                    ENTRY_CREATE -> println("File created: $filePath")
-                    ENTRY_DELETE -> println("File deleted: $filePath")
-                    ENTRY_MODIFY -> println("File modified: $filePath")
+                    ENTRY_CREATE -> println("File created: ${filePath.toAbsolutePath()}")
+                    ENTRY_DELETE -> println("File deleted: ${filePath.toAbsolutePath()}")
+                    ENTRY_MODIFY -> println("File modified: ${filePath.toAbsolutePath()}")
                 }
-                Generator.generate(filePath)
+                Generator.generate(filePath, kind as WatchEvent.Kind<Path>)
             }
 
             // Reset key to allow further events to be captured
@@ -67,4 +66,14 @@ fun watchFiles() {
         }
 
     }
+}
+
+private fun registerAll(start: Path, watcher: WatchService) {
+
+    JavaFiles.walkFileTree(start, object : SimpleFileVisitor<Path>() {
+        override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+            dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY)
+            return FileVisitResult.CONTINUE
+        }
+    })
 }

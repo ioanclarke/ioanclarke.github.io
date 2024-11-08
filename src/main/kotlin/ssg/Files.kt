@@ -29,13 +29,13 @@ object Files {
     fun loadFile(path: Path): File {
         val file = path.toFile()
         if (!file.exists()) {
-            println("$path not found")
+            println("${path.toAbsolutePath()} not found")
             exitProcess(4)
         }
         return file
     }
 
-    fun loadPageFiles(): Array<File> {
+    fun loadPageFiles(): List<File> {
         val pagesDir = pagesDir.toFile()
         if (!pagesDir.exists()) {
             println("$pagesDir not found")
@@ -47,7 +47,7 @@ object Files {
             exitProcess(2)
         }
 
-        return pagesDir.listFiles()!!
+        return pagesDir.listFiles()!!.toList()
     }
 
     fun createPublicDir(): File {
