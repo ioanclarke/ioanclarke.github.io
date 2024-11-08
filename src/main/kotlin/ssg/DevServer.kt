@@ -10,7 +10,7 @@ import java.io.File
 fun main() {
     embeddedServer(Netty, port = 8080) {
         routing {
-            staticFiles("/", File("public")) {
+            staticFiles("/", File("docs")) {
                 default("index.html")
             }
         }

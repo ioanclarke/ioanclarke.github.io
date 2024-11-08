@@ -70,12 +70,12 @@ object Files {
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun createPublicDir(): Path {
-        val publicDir = Path("public")
-        if (publicDir.exists()) {
-            println("Deleting existing directory ${publicDir.toAbsolutePath()}")
-            publicDir.deleteRecursively()
+    fun createDocsDir(): Path {
+        val docsDir = Path("docs")
+        if (docsDir.exists()) {
+            println("Deleting existing directory ${docsDir.toAbsolutePath()}")
+            docsDir.deleteRecursively()
         }
-        return publicDir.createDirectory()
+        return docsDir.createDirectory()
     }
 }

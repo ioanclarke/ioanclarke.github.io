@@ -3,7 +3,7 @@ package ssg
 import java.nio.file.Path
 import kotlin.io.path.*
 
-val publicDir: Path = Files.createPublicDir()
+val docsDir: Path = Files.createDocsDir()
 
 fun main() {
     writeHtmlFiles()
@@ -16,12 +16,12 @@ fun writeHtmlFiles() {
 
     pages.forEach {
         val relativePath = Files.pagesDir.toAbsolutePath().relativize(it.toAbsolutePath())
-        val destination = publicDir.resolve(relativePath)
+        val destination = docsDir.resolve(relativePath)
         val contentReplaced = baseHtml.replace("{{content}}", it.readText())
 
         val parent = relativePath.parent
         val finished = if (parent != null) {
-            val parentDirDestination = publicDir.resolve(parent)
+            val parentDirDestination = docsDir.resolve(parent)
             if (parentDirDestination.notExists()) {
                 println("Creating directory $parentDirDestination")
                 parentDirDestination.createDirectories()
@@ -40,7 +40,7 @@ fun writeHtmlFiles() {
 fun writeAssets() {
    Files.loadAssets().forEach {
        val relativePath = Files.resourcesDir.toAbsolutePath().relativize(it.toAbsolutePath())
-       val destination = publicDir.resolve(relativePath)
+       val destination = docsDir.resolve(relativePath)
        it.copyTo(destination, overwrite = true)
        println("Copied ${it.name}")
    }
