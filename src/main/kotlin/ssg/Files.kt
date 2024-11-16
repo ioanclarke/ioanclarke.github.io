@@ -1,6 +1,5 @@
 package ssg
 
-import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.*
@@ -9,9 +8,9 @@ import kotlin.system.exitProcess
 
 object Files {
 
+    private val assetFileNames: List<String> = listOf("styles.css", "favicon.ico")
     val resourcesDir: Path = Paths.get("").resolve("src/main/resources")
-    val pagesDir: Path = Paths.get("").resolve( resourcesDir).resolve("pages")
-
+    val pagesDir: Path = Paths.get("").resolve(resourcesDir).resolve("pages")
     private val baseFile: Path = pagesDir.parent.resolve("base.html")
 
 
@@ -28,16 +27,6 @@ object Files {
         return file.readText()
     }
 
-
-    fun loadFile(path: Path): File {
-        val file = path.toFile()
-        if (!file.exists()) {
-            println("${path.toAbsolutePath()} not found")
-            exitProcess(4)
-        }
-        return file
-    }
-
     @OptIn(ExperimentalPathApi::class)
     fun loadPageFiles(): Sequence<Path> {
         if (!pagesDir.exists()) {
@@ -50,18 +39,15 @@ object Files {
             exitProcess(2)
         }
 
-
-
         return pagesDir.walk()
     }
 
     fun loadAssets(): List<Path> {
-        val paths = listOf("styles.css", "favicon.ico", "404.html")
-            .map { resourcesDir.resolve(it) }
+        val paths = assetFileNames.map { resourcesDir.resolve(it) }
 
         paths.forEach {
             if (!it.exists()) {
-                println("$it not found")
+                println("$it asset not found")
                 exitProcess(5)
             }
         }
