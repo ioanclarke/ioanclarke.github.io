@@ -18,6 +18,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<JavaExec>("generate") {
+    group = "application"
+    description = "Runs the main method of the specified Kotlin file"
+    mainClass.set("ssg.GeneratorKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 kotlin {
     jvmToolchain(21)
 }
