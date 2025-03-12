@@ -9,6 +9,7 @@ fn main() -> io::Result<()> {
     build_pages(&base)?;
     build_posts(&base)?;
     copy_assets()?;
+    println!("Done");
     Ok(())
 }
 
@@ -21,6 +22,7 @@ fn clean() {
 }
 
 fn build_pages(base: &str) -> io::Result<()> {
+    println!("Building pages...");
     for entry in fs::read_dir("public/pages")? {
         let entry = entry?;
         let path = entry.path();
@@ -34,6 +36,7 @@ fn build_pages(base: &str) -> io::Result<()> {
 }
 
 fn build_posts(base: &str) -> io::Result<()> {
+    println!("Building posts...");
     for entry in fs::read_dir("public/posts")? {
         let entry = entry?;
         let path = entry.path();
@@ -47,6 +50,7 @@ fn build_posts(base: &str) -> io::Result<()> {
 }
 
 fn copy_assets() -> io::Result<()> {
+    println!("Copying assets...");
     for entry in fs::read_dir("public/assets")? {
         let entry = entry?;
         let path = entry.path();
