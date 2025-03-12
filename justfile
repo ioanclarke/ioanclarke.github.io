@@ -4,4 +4,4 @@ build:
     cargo build --release
 
 deploy:
-    just build && ./target/release/my-ssg-rust && git add . && git commit && echo "pushing"
+    just build && ./target/release/my-ssg-rust && git add . && git commit && git push
