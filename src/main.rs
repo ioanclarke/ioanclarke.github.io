@@ -41,7 +41,7 @@ fn build_posts(base: &str) -> io::Result<()> {
         let entry = entry?;
         let path = entry.path();
         let content = fs::read_to_string(&path)?;
-        let new_content = base.replace("{{content}}", &content).replace(r#"href=""#, r#"href="../"#);
+        let new_content = base.replace(r#"href=""#, r#"href="../"#).replace("{{content}}", &content);
         let new_path = path.strip_prefix("public").expect("should be able to remove 'public'");
         let destination = Path::new("docs").join(new_path);
         fs::write(destination, new_content)?;
