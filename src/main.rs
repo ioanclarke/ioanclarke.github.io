@@ -28,7 +28,9 @@ fn build_pages(base: &str) -> io::Result<()> {
         let path = entry.path();
         let content = fs::read_to_string(&path)?;
         let new_content = base.replace("{{content}}", &content);
-        let new_path = path.strip_prefix("public/pages").expect("should be able to remove 'public/pages'");
+        let new_path = path
+            .strip_prefix("public/pages")
+            .expect("should be able to remove 'public/pages'");
         let destination = Path::new("docs").join(new_path);
         fs::write(destination, new_content)?;
     }
@@ -41,8 +43,12 @@ fn build_posts(base: &str) -> io::Result<()> {
         let entry = entry?;
         let path = entry.path();
         let content = fs::read_to_string(&path)?;
-        let new_content = base.replace(r#"href=""#, r#"href="../"#).replace("{{content}}", &content);
-        let new_path = path.strip_prefix("public").expect("should be able to remove 'public'");
+        let new_content = base
+            .replace(r#"href=""#, r#"href="../"#)
+            .replace("{{content}}", &content);
+        let new_path = path
+            .strip_prefix("public")
+            .expect("should be able to remove 'public'");
         let destination = Path::new("docs").join(new_path);
         fs::write(destination, new_content)?;
     }
@@ -54,7 +60,9 @@ fn copy_assets() -> io::Result<()> {
     for entry in fs::read_dir("public/assets")? {
         let entry = entry?;
         let path = entry.path();
-        let new_path = path.strip_prefix("public/assets").expect("should be able to remove 'public'");
+        let new_path = path
+            .strip_prefix("public/assets")
+            .expect("should be able to remove 'public'");
         let destination = Path::new("docs").join(new_path);
         fs::copy(path, destination)?;
     }

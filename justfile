@@ -4,6 +4,10 @@ launch:
     @open ./docs/index.html
     @just watch
 
+format:
+    cargo fmt
+    cargo clippy --fix --allow-dirty --allow-staged
+
 build:
     cargo build --release
 
@@ -15,7 +19,7 @@ watch:
     @echo 'Watching for changes in ./public'
     @find public -type f | entr -s 'just create'
 
-deploy: build create
+deploy: format build create
     git add .
     git commit
     git push
