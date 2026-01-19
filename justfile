@@ -1,8 +1,9 @@
 alias d := deploy
 
-launch:
+dev:
     @open ./docs/index.html
-    @just watch
+    @echo 'Watching for changes in ./public'
+    @find public -type f | entr -s 'just create'
 
 format:
     cargo fmt
@@ -12,12 +13,7 @@ build:
     cargo build --release
 
 create:
-    @echo 'Building site...'
     @./target/release/my-ssg-rust
-
-watch:
-    @echo 'Watching for changes in ./public'
-    @find public -type f | entr -s 'just create'
 
 deploy: format build create
     git add .
