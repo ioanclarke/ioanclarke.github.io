@@ -8,7 +8,7 @@
 }
 
 body {
-    font-family: 'Anonymous Pro', monospace;
+    font-family: "Anonymous Pro", monospace;
     width: 90vw;
     margin: 0 auto;
     background-color: #f0f1f2;
@@ -22,7 +22,6 @@ body {
     }
 }
 
-
 main {
     padding: 10px var(--content-horizontal-padding);
     --corner-rounding: 10px;
@@ -31,7 +30,8 @@ main {
     /* color: var(--font-color); */
 }
 
-h1, h2 {
+h1,
+h2 {
     font-weight: normal;
 }
 
@@ -73,7 +73,6 @@ nav {
                 text-decoration: none;
                 color: var(--font-color);
                 padding-bottom: 5px;
-
             }
 
             a:hover {
@@ -87,19 +86,21 @@ nav {
 p {
     padding-top: 10px;
     margin: 0;
-
+    line-height: 1.5em;
 }
 
 ol {
-    padding: 0 10px;
+    padding: 10px;
     li {
         list-style-type: disc;
+        padding: 5px;
     }
 }
 
 pre {
     font-size: 1rem;
     color: unset;
+    margin: 0;
 }
 
 .posts-list {
@@ -116,16 +117,10 @@ code {
     font-size: 1rem;
 }
 
-.summary {
-    color: dimgray;
-    font-style: italic;
-    font-size: 1.15rem;
-    margin-bottom: 1rem;
-}
-
 .last-updated {
-    margin-bottom: 1rem;
+    margin: 1rem 0;
     font-style: italic;
+    color: dimgray;
 }
 
 /* Everything below is taken from https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css */
@@ -133,67 +128,92 @@ code {
 pre code.hljs {
     display: block;
     overflow-x: auto;
-    padding: 1em
+    /*padding: 1em*/
 }
 
 code.hljs {
-    padding: 3px 5px
+    padding: 3px 5px;
 }
 
 .hljs {
     background: #f3f3f3;
-    color: #444
+    color: #444;
 }
 
 .hljs-comment {
-    color: #697070
+    color: #697070;
 }
 
-.hljs-punctuation, .hljs-tag {
-    color: #444a
+.hljs-punctuation,
+.hljs-tag {
+    color: #444a;
 }
 
-.hljs-tag .hljs-attr, .hljs-tag .hljs-name {
-    color: #444
+.hljs-tag .hljs-attr,
+.hljs-tag .hljs-name {
+    color: #444;
 }
 
-.hljs-attribute, .hljs-doctag, .hljs-keyword, .hljs-meta .hljs-keyword, .hljs-name, .hljs-selector-tag {
-    font-weight: 700
+.hljs-attribute,
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-name,
+.hljs-selector-tag {
+    font-weight: 700;
 }
 
-.hljs-deletion, .hljs-number, .hljs-quote, .hljs-selector-class, .hljs-selector-id, .hljs-string, .hljs-template-tag, .hljs-type {
-    color: #800
-}
-
-.hljs-section, .hljs-title {
+.hljs-deletion,
+.hljs-number,
+.hljs-quote,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-string,
+.hljs-template-tag,
+.hljs-type {
     color: #800;
-    font-weight: 700
 }
 
-.hljs-link, .hljs-operator, .hljs-regexp, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-symbol, .hljs-template-variable, .hljs-variable {
-    color: #ab5656
+.hljs-section,
+.hljs-title {
+    color: #800;
+    font-weight: 700;
+}
+
+.hljs-link,
+.hljs-operator,
+.hljs-regexp,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-symbol,
+.hljs-template-variable,
+.hljs-variable {
+    color: #ab5656;
 }
 
 .hljs-literal {
-    color: #695
+    color: #695;
 }
 
-.hljs-addition, .hljs-built_in, .hljs-bullet, .hljs-code {
-    color: #397300
+.hljs-addition,
+.hljs-built_in,
+.hljs-bullet,
+.hljs-code {
+    color: #397300;
 }
 
 .hljs-meta {
-    color: #1f7199
+    color: #1f7199;
 }
 
 .hljs-meta .hljs-string {
-    color: #38a
+    color: #38a;
 }
 
 .hljs-emphasis {
-    font-style: italic
+    font-style: italic;
 }
 
 .hljs-strong {
-    font-weight: 700
+    font-weight: 700;
 }

@@ -1,18 +1,122 @@
 <h1>The joys of jOOQ</h1>
-<p>This is an appreciation of the excellent <a href="https://www.jooq.org/" target="_blank" rel="noopener noreferrer">jOOQ</a> library for JVM langauges</p>
-<p>Last updated: 2026-01-19</p>
 <p>
-    I love jOOQ. In case you've not heard of it, here's the, in my opinion, very accurate, description of jOOQ from its
-    website: "jOOQ generates Java code from your database and lets you build type safe SQL queries through its fluent API."
-    This might be the understatement of the century. jOOQ might just be my favourite Java library - I use it everyday in work
-    and after thinking about it for some time, I can only come up with a single issue with it.
+    This is an appreciation of the excellent
+    <a href="https://www.jooq.org/" target="_blank" rel="noopener noreferrer"
+        >jOOQ</a
+    >
+    database library for JVM langauges.
+</p>
+<p class="last-updated">Last updated: 2026-01-19</p>
+<p>
+    I love jOOQ. In case you've not heard of it, here's the elegant
+    description from jOOQ's website:
+    <blockquote>jOOQ generates Java code from your
+    database and lets you build type safe SQL queries through its fluent API.</blockquote>
+    This might be the understatement of the century. jOOQ might just be my
+    favourite Java library - I use it everyday in work and after thinking about
+    it for some time, I can only come up with a single issue I have with it (more on that later).
+</p>
+<p>
+    I feel like most other database-querying libraries try to reinvent SQL for
+    some reason. You have ORMs like Hibernate that try to abstract the SQL
+    away, which is all well and good until you realise you have to learn a
+    second language to configure them. You have Spring Data JPA that also
+    tries to remove the need to write SQL, which works nicely until you need
+    something more than a 'get/update by ID'.
+    <br />
+</p>
 
-    I feel like most other database-querying libraries try to reinvent SQL for some reason. You have ORMs, like Hibernate,
-    which try to abstract the SQL away, which is all well and good until you realise you have to learn a second language
-    to configure them. You have Spring Data JPA, which also tries to remove the need to write SQL, which works nicely
-    until you need something more than a 'get by ID' or 'update by ID'.
+<p>By comparison, here's some Java code that uses jOOQ:</p>
+<pre>
+    <code class="language-java">
+        DSLContext db = DSL.using(SQLDialect.POSTGRES);
 
-    Here's what some code that uses jOOQ looks like:
-    <
-
+        List&lt;Book&gt; books = db.select(BOOK.NAME, AUTHOR.NAME)
+                .from(BOOK)
+                .join(AUTHOR)
+                .on(BOOK.AUTHOR_ID.equal(AUTHOR.ID))
+                .fetchInto(Book.class);
+    </code>
+</pre>
+<p>
+    If you've ever written SQL before, then you already understand what this
+    code is doing. That's the beauty - you don't have to learn any special
+    language, it's just SQL. Actually, it's better than just SQL - it's
+    <i>type-safe</i> SQL. This means that, as long as you stick to referencing
+    generated tables and column, it's nigh on impossible to write a statment
+    with a syntax error.
+</p>
+<p>
+    Oh yeah, notice how the description of jOOQ says that it "generates"
+    Java code? I don't understand why more libraries don't have this feature. In
+    many other database libraries, you have to define your tables and columns
+    twice - once in your SQL scripts and once in code. With jOOQ, you do it only
+    once.
+</p>
+<p>
+    To get the code generation, you just add a snippet to your <code>POM.xml</code> or
+    <code>build.gradle</code> file to have jOOQ inspect your schema on build and
+    generate type-safe, intuitive classes for all your tables and columns.
+</p>
+<p>
+    jOOQ is not limited to simple queries either - your are able to construct pretty
+    much any SQL query using the methods it exposes. There is a
+    <code>DSL.sql(String)</code>
+    method in case you need to execute some custom SQL, I suppose for
+    performance reasons or because your statement is too complex to represent
+    using jOOQ, but I have never used this or seen it in any of our codebases.
+</p>
+<p>
+    In the first paragraph, I mentioned that there is an issue with jOOQ. So in
+    the interest of fairness, here it is: jOOQ offers a <code>fetchLazy()</code>
+    method for reading records from your database on demand instead of loading
+    them all into memory at once - very useful if you have a query that can
+    return a massive number of records. However, this behaviour only works if
+    you specify the fetch size before calling the method, a very detail that is
+    easy to forget. For example, if you are using Postgres and execute the following
+    query, then all records will be loaded into memory at once, probably OOMing your app:
+</p>
+<pre>
+    <code class="language-java">
+        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
+                .fetchLazy()
+                .fetchStreamInto(Book.class);
+    </code>
+</pre>
+<p>
+    Note that <code>selectFrom(BOOK)</code> selects all columns from the
+    <code>BOOK</code> table.
+</p>
+<p>
+    To use <code>fetchLazy()</code> properly, you need to call
+    <code>fetchSize(int)</code>
+    beforehand i.e
+</p>
+<pre>
+    <code class="language-java">
+        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
+                .fetchSize(1000)
+                .fetchLazy()
+                .fetchStreamInto(Book.class);
+    </code>
+</pre>
+<p>
+    This ensures that only 1000 records are fetched from the database at a time.
+</p>
+<p>
+    In fairness to jOOQ, this behaviour is clearly documented in the javadoc:
+    <blockquote>
+        Depending on your JDBC driver's default behaviour, this may load the whole
+        database result into the driver's memory. In order to indicate to the driver
+        that you may not want to fetch all records at once, use fetchSize(int) or
+        Settings.setFetchSize(Integer) prior to calling this method.
+    </blockquote>
+</p>
+<p>
+    It's worth mentioning that jOOQ does require payment for certain types of databases,
+    but the edition that supports Postgres is free.
+</p>
+<p>
+    So that's it. Next time you spin up an application with a database, try using jOOQ
+    (see <a href="https://www.jooq.org/javadoc/latest/org.jooq/org/jooq/SQLDialect.html" target="_blank" rel="noopener noreferrer">the org.jooq.SQLDialect javadoc</a> for the list of supported dialects).
 </p>
