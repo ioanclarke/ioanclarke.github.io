@@ -89,7 +89,8 @@ p {
     line-height: 1.5em;
 }
 
-ol {
+ol,
+ul {
     padding: 10px;
     li {
         list-style-type: disc;
