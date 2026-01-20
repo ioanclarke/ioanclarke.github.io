@@ -51,7 +51,7 @@ fn build_posts(base: &str) -> io::Result<()> {
             base: String::from(base),
             replacer: |base, content| {
                 let html_input = base
-                    .replace(r#"href=""#, r#"href="../"#)
+                    .replace(r#"href="styles.css"#, r#"href="../styles.css"#)
                     .replace("{{content}}", content);
                 highlight_code(html_input)
             },
