@@ -1,3 +1,4 @@
 /target
 .idea
 my-ssg-rust.iml
+node_modules
