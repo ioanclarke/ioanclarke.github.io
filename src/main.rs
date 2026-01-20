@@ -15,7 +15,7 @@ fn main() -> io::Result<()> {
     build_pages(&base)?;
     build_posts(&base)?;
     copy_assets()?;
-    println!("Done");
+    println!("Done!");
     Ok(())
 }
 
@@ -65,7 +65,7 @@ fn copy_assets() -> io::Result<()> {
 
 fn generate(src_dir: &str, dest_dir: &str, fs_action: FsAction) -> io::Result<()> {
     let src_path = Path::new(INPUT_DIRECTORY).join(src_dir);
-    println!("Reading {}", src_path.to_str().unwrap());
+    println!("Reading {}...", src_path.to_str().unwrap());
     for entry in fs::read_dir(src_path)? {
         let entry = entry?;
         let path = entry.path();
