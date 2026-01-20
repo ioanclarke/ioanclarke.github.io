@@ -19,7 +19,7 @@
     <a href="https://www.jooq.org/" rel="noopener noreferrer" target="_blank">jOOQ</a>
     database library for JVM langauges.
 </p>
-<p class="last-updated">Last updated: 2026-01-19</p>
+<p class="last-updated">Last updated: 2026-01-20</p>
 <p>
     I love jOOQ. In case you've not heard of it, here's the elegant
     description from jOOQ's website:
@@ -43,7 +43,7 @@
 <pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
 <span class="line"><span style="color:#24292E">    DSLContext db </span><span style="color:#D73A49">=</span><span style="color:#24292E"> DSL.</span><span style="color:#6F42C1">using</span><span style="color:#24292E">(SQLDialect.POSTGRES);</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#24292E">    List books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(BOOK.NAME, AUTHOR.NAME)</span></span>
+<span class="line"><span style="color:#24292E">    List&lt;</span><span style="color:#D73A49">Book</span><span style="color:#24292E">&gt; books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(BOOK.NAME, AUTHOR.NAME)</span></span>
 <span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">from</span><span style="color:#24292E">(BOOK)</span></span>
 <span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">join</span><span style="color:#24292E">(AUTHOR)</span></span>
 <span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">on</span><span style="color:#24292E">(BOOK.AUTHOR_ID.</span><span style="color:#6F42C1">equal</span><span style="color:#24292E">(AUTHOR.ID))</span></span>
@@ -99,7 +99,7 @@
 <p>
     To use <code>fetchLazy()</code> properly, you need to call
     <code>fetchSize(int)</code>
-    beforehand i.e
+    beforehand e.g
 </p>
 <pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
 <span class="line"><span style="color:#24292E">    Stream&lt;</span><span style="color:#D73A49">Book</span><span style="color:#24292E">&gt; books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">selectFrom</span><span style="color:#24292E">(BOOK)</span></span>
@@ -115,8 +115,8 @@
     </p><blockquote>
         Depending on your JDBC driver's default behaviour, this may load the whole
         database result into the driver's memory. In order to indicate to the driver
-        that you may not want to fetch all records at once, use fetchSize(int) or
-        Settings.setFetchSize(Integer) prior to calling this method.
+        that you may not want to fetch all records at once, use <code>fetchSize(int)</code> or
+        <code>Settings.setFetchSize(Integer)</code> prior to calling this method.
     </blockquote>
 <p></p>
 <p>

@@ -6,7 +6,7 @@
     >
     database library for JVM langauges.
 </p>
-<p class="last-updated">Last updated: 2026-01-19</p>
+<p class="last-updated">Last updated: 2026-01-20</p>
 <p>
     I love jOOQ. In case you've not heard of it, here's the elegant
     description from jOOQ's website:
@@ -31,7 +31,7 @@
     <code class="language-java">
     DSLContext db = DSL.using(SQLDialect.POSTGRES);
 
-    List<Book> books = db.select(BOOK.NAME, AUTHOR.NAME)
+    List&lt;Book&gt; books = db.select(BOOK.NAME, AUTHOR.NAME)
             .from(BOOK)
             .join(AUTHOR)
             .on(BOOK.AUTHOR_ID.equal(AUTHOR.ID))
@@ -90,7 +90,7 @@
 <p>
     To use <code>fetchLazy()</code> properly, you need to call
     <code>fetchSize(int)</code>
-    beforehand i.e
+    beforehand e.g
 </p>
 <pre>
     <code class="language-java">
@@ -108,8 +108,8 @@
     <blockquote>
         Depending on your JDBC driver's default behaviour, this may load the whole
         database result into the driver's memory. In order to indicate to the driver
-        that you may not want to fetch all records at once, use fetchSize(int) or
-        Settings.setFetchSize(Integer) prior to calling this method.
+        that you may not want to fetch all records at once, use <code>fetchSize(int)</code> or
+        <code>Settings.setFetchSize(Integer)</code> prior to calling this method.
     </blockquote>
 </p>
 <p>
