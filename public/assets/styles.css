@@ -27,7 +27,7 @@ main {
     --corner-rounding: 10px;
     border-bottom-right-radius: var(--corner-rounding);
     border-bottom-left-radius: var(--corner-rounding);
-    /* color: var(--font-color); */
+    color: var(--font-color);
 }
 
 h1,
@@ -101,7 +101,7 @@ ul {
 pre {
     font-size: 1rem;
     color: unset;
-    margin: 0;
+    margin: 1em 0;
 }
 
 .posts-list {

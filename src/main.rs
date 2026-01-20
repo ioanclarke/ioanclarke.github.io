@@ -1,9 +1,12 @@
+use kuchiki::traits::TendrilSink;
 use std::fs;
 use std::io;
+use std::io::Write;
 use std::path::Path;
+use std::process::{Command, Stdio};
 
-const CONTENT_INSERTION_POINT: &'static str = "{{content}}";
-const INPUT_DIRECTORY: &'static str = "public";
+const CONTENT_INSERTION_POINT: &str = "{{content}}";
+const INPUT_DIRECTORY: &str = "public";
 
 fn main() -> io::Result<()> {
     clean()?;
@@ -29,17 +32,14 @@ fn create_dirs() -> io::Result<()> {
     fs::create_dir_all("docs/posts")
 }
 
-
 fn build_pages(base: &str) -> io::Result<()> {
     generate(
         "pages",
         "",
         FsAction::WriteContent {
             base: String::from(base),
-            replacer: |base, content| {
-                base .replace(CONTENT_INSERTION_POINT, &content)
-            },
-        }
+            replacer: |base, content| base.replace(CONTENT_INSERTION_POINT, content),
+        },
     )
 }
 
@@ -50,8 +50,10 @@ fn build_posts(base: &str) -> io::Result<()> {
         FsAction::WriteContent {
             base: String::from(base),
             replacer: |base, content| {
-                base.replace(r#"href=""#, r#"href="../"#)
-                    .replace("{{content}}", content)
+                let html_input = base
+                    .replace(r#"href=""#, r#"href="../"#)
+                    .replace("{{content}}", content);
+                highlight_code(html_input)
             },
         },
     )
@@ -62,14 +64,18 @@ fn copy_assets() -> io::Result<()> {
 }
 
 fn generate(src_dir: &str, dest_dir: &str, fs_action: FsAction) -> io::Result<()> {
-    println!("Reading {}", src_dir);
     let src_path = Path::new(INPUT_DIRECTORY).join(src_dir);
+    println!("Reading {}", src_path.to_str().unwrap());
     for entry in fs::read_dir(src_path)? {
         let entry = entry?;
         let path = entry.path();
-        let file_name = path
-            .file_name()
-            .expect(format!("should be to get file name from '{}", path.to_str().unwrap()).as_str());
+        println!("Reading {}", path.to_str().unwrap());
+        let file_name = path.file_name().unwrap_or_else(|| {
+            panic!(
+                "should be to get file name from '{}",
+                path.to_str().unwrap()
+            )
+        });
         let destination = Path::new("docs").join(dest_dir).join(file_name);
 
         match fs_action {
@@ -92,4 +98,47 @@ enum FsAction {
         replacer: fn(&str, &str) -> String,
     },
     CopyFile,
+}
+
+fn highlight_code(html_input: String) -> String {
+    let document = kuchiki::parse_html().one(html_input);
+    let code_node_refs: Vec<_> = document.select("pre > code").unwrap().collect();
+
+    for code_node_ref in code_node_refs {
+        let code_node = code_node_ref.as_node();
+        let pre_node = code_node.parent().unwrap();
+
+        let raw_code = code_node.text_contents();
+
+        let mut highlight_task = Command::new("node")
+            .arg("highlight.mjs")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        let mut stdin = highlight_task
+            .stdin
+            .take()
+            .expect("Should be able to open stdin");
+        std::thread::spawn(move || {
+            stdin
+                .write_all(raw_code.as_bytes())
+                .expect("Code should be able to be written to standard");
+        });
+
+        let highlighted_html =
+            String::from_utf8(highlight_task.wait_with_output().unwrap().stdout).unwrap();
+
+        let new_fragment = kuchiki::parse_html().one(highlighted_html);
+
+        let new_pre = new_fragment.select_first("pre").unwrap().as_node().clone();
+
+        pre_node.insert_after(new_pre);
+        pre_node.detach();
+    }
+
+    let mut output = Vec::new();
+    document.serialize(&mut output).unwrap();
+    String::from_utf8(output).unwrap()
 }

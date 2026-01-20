@@ -29,13 +29,13 @@
 <p>By comparison, here's some Java code that uses jOOQ:</p>
 <pre>
     <code class="language-java">
-        DSLContext db = DSL.using(SQLDialect.POSTGRES);
+    DSLContext db = DSL.using(SQLDialect.POSTGRES);
 
-        List&lt;Book&gt; books = db.select(BOOK.NAME, AUTHOR.NAME)
-                .from(BOOK)
-                .join(AUTHOR)
-                .on(BOOK.AUTHOR_ID.equal(AUTHOR.ID))
-                .fetchInto(Book.class);
+    List<Book> books = db.select(BOOK.NAME, AUTHOR.NAME)
+            .from(BOOK)
+            .join(AUTHOR)
+            .on(BOOK.AUTHOR_ID.equal(AUTHOR.ID))
+            .fetchInto(Book.class);
     </code>
 </pre>
 <p>
@@ -78,9 +78,9 @@
 </p>
 <pre>
     <code class="language-java">
-        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
-                .fetchLazy()
-                .fetchStreamInto(Book.class);
+    Stream&lt;Book&gt; books = db.selectFrom(BOOK)
+            .fetchLazy()
+            .fetchStreamInto(Book.class);
     </code>
 </pre>
 <p>
@@ -94,10 +94,10 @@
 </p>
 <pre>
     <code class="language-java">
-        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
-                .fetchSize(1000)
-                .fetchLazy()
-                .fetchStreamInto(Book.class);
+    Stream&lt;Book&gt; books = db.selectFrom(BOOK)
+            .fetchSize(1000)
+            .fetchLazy()
+            .fetchStreamInto(Book.class);
     </code>
 </pre>
 <p>

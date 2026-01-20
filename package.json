@@ -1,0 +1,26 @@
+{
+  "name": "my-ssg-rust",
+  "version": "1.0.0",
+  "description": "This is a very basic static site generator that I use to generate my personal website.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioanclarke/ioanclarke.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ioanclarke/ioanclarke.github.io/issues"
+  },
+  "homepage": "https://github.com/ioanclarke/ioanclarke.github.io#readme",
+  "dependencies": {
+    "shiki": "^3.21.0"
+  }
+}

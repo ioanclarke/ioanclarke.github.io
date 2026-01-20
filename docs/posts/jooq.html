@@ -1,39 +1,35 @@
-<html lang="en">
-<head>
-    <title>Ioan Clarke</title>
-    <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="../https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16-gruvbox-light-medium.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
-    <script>hljs.highlightAll();</script>
-</head>
-<body>
-<nav>
-    <menu>
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="../projects.html">Projects</a></li>
-        <li><a href="../posts.html">Posts</a></li>
-    </menu>
-</nav>
-<main>
-<h1>The joys of jOOQ</h1>
+<html lang="en"><head>
+        <title>Ioan Clarke</title>
+        <link href="../styles.css" rel="stylesheet">
+        <link href="../https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16-gruvbox-light-medium.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+        <!--<script>hljs.highlightAll();</script>-->
+    </head>
+    <body>
+        <nav>
+            <menu>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../projects.html">Projects</a></li>
+                <li><a href="../posts.html">Posts</a></li>
+            </menu>
+        </nav>
+        <main><h1>The joys of jOOQ</h1>
 <p>
     This is an appreciation of the excellent
-    <a href="https://www.jooq.org/" target="_blank" rel="noopener noreferrer"
-        >jOOQ</a
-    >
+    <a href="https://www.jooq.org/" rel="noopener noreferrer" target="_blank">jOOQ</a>
     database library for JVM langauges.
 </p>
 <p class="last-updated">Last updated: 2026-01-19</p>
 <p>
     I love jOOQ. In case you've not heard of it, here's the elegant
     description from jOOQ's website:
-    <blockquote>jOOQ generates Java code from your
+    </p><blockquote>jOOQ generates Java code from your
     database and lets you build type safe SQL queries through its fluent API.</blockquote>
     This might be the understatement of the century. jOOQ might just be my
     favourite Java library - I use it everyday in work and after thinking about
     it for some time, I can only come up with a single issue I have with it (more on that later).
-</p>
+<p></p>
 <p>
     I feel like most other database-querying libraries try to reinvent SQL for
     some reason. You have ORMs like Hibernate that try to abstract the SQL
@@ -41,21 +37,19 @@
     second language to configure them. You have Spring Data JPA that also
     tries to remove the need to write SQL, which works nicely until you need
     something more than a 'get/update by ID'.
-    <br />
+    <br>
 </p>
 
 <p>By comparison, here's some Java code that uses jOOQ:</p>
-<pre>
-    <code class="language-java">
-        DSLContext db = DSL.using(SQLDialect.POSTGRES);
-
-        List&lt;Book&gt; books = db.select(BOOK.NAME, AUTHOR.NAME)
-                .from(BOOK)
-                .join(AUTHOR)
-                .on(BOOK.AUTHOR_ID.equal(AUTHOR.ID))
-                .fetchInto(Book.class);
-    </code>
-</pre>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    DSLContext db </span><span style="color:#D73A49">=</span><span style="color:#24292E"> DSL.</span><span style="color:#6F42C1">using</span><span style="color:#24292E">(SQLDialect.POSTGRES);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">    List books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(BOOK.NAME, AUTHOR.NAME)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">from</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">join</span><span style="color:#24292E">(AUTHOR)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">on</span><span style="color:#24292E">(BOOK.AUTHOR_ID.</span><span style="color:#6F42C1">equal</span><span style="color:#24292E">(AUTHOR.ID))</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
 <p>
     If you've ever written SQL before, then you already understand what this
     code is doing. That's the beauty - you don't have to learn any special
@@ -94,13 +88,11 @@
     easy to forget. For example, if you are using Postgres and execute the following
     query, then all records will be loaded into memory at once, probably OOMing your app:
 </p>
-<pre>
-    <code class="language-java">
-        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
-                .fetchLazy()
-                .fetchStreamInto(Book.class);
-    </code>
-</pre>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Stream&lt;</span><span style="color:#D73A49">Book</span><span style="color:#24292E">&gt; books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">selectFrom</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchLazy</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchStreamInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
 <p>
     Note that <code>selectFrom(BOOK)</code> selects all columns from the
     <code>BOOK</code> table.
@@ -110,35 +102,33 @@
     <code>fetchSize(int)</code>
     beforehand i.e
 </p>
-<pre>
-    <code class="language-java">
-        Stream&lt;Book&gt; books = db.selectFrom(BOOK)
-                .fetchSize(1000)
-                .fetchLazy()
-                .fetchStreamInto(Book.class);
-    </code>
-</pre>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Stream&lt;</span><span style="color:#D73A49">Book</span><span style="color:#24292E">&gt; books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">selectFrom</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchSize</span><span style="color:#24292E">(</span><span style="color:#005CC5">1000</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchLazy</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchStreamInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
 <p>
     This ensures that only 1000 records are fetched from the database at a time.
 </p>
 <p>
     In fairness to jOOQ, this behaviour is clearly documented in the javadoc:
-    <blockquote>
+    </p><blockquote>
         Depending on your JDBC driver's default behaviour, this may load the whole
         database result into the driver's memory. In order to indicate to the driver
         that you may not want to fetch all records at once, use fetchSize(int) or
         Settings.setFetchSize(Integer) prior to calling this method.
     </blockquote>
-</p>
+<p></p>
 <p>
     It's worth mentioning that jOOQ does require payment for certain types of databases,
     but the edition that supports Postgres is free.
 </p>
 <p>
     So that's it. Next time you spin up an application with a database, try using jOOQ
-    (see <a href="https://www.jooq.org/javadoc/latest/org.jooq/org/jooq/SQLDialect.html" target="_blank" rel="noopener noreferrer">the org.jooq.SQLDialect javadoc</a> for the list of supported dialects).
+    (see <a href="https://www.jooq.org/javadoc/latest/org.jooq/org/jooq/SQLDialect.html" rel="noopener noreferrer" target="_blank">the org.jooq.SQLDialect javadoc</a> for the list of supported dialects).
 </p>
-
 </main>
-</body>
-</html>
+    
+
+</body></html>
