@@ -83,7 +83,7 @@
     method for reading records from your database on demand instead of loading
     them all into memory at once - very useful if you have a query that can
     return a massive number of records. However, this behaviour only works if
-    you specify the fetch size before calling the method, a very detail that is
+    you specify the fetch size before calling the method, a detail that is
     easy to forget. For example, if you are using Postgres and execute the following
     query, then all records will be loaded into memory at once, probably OOMing your app:
 </p>
