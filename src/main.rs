@@ -144,12 +144,7 @@ fn highlight_code(document: NodeRef) -> NodeRef {
 }
 
 fn fix_links(document: NodeRef) -> NodeRef {
-    let nodes_with_links = match document.select(r#"[href]"#) {
-        Ok(els) => els,
-        Err(e) => panic!("{}", format!("{:?}", e)),
-    };
-    for nodes_with_links in nodes_with_links {
-        println!("found href");
+    for nodes_with_links in document.select(r#"[href]"#).unwrap() {
         let mut attrs = nodes_with_links.attributes.borrow_mut();
         let href = match attrs.get("href") {
             Some(h) => h.to_owned(),
@@ -157,7 +152,6 @@ fn fix_links(document: NodeRef) -> NodeRef {
         };
 
         if !href.starts_with("https://") {
-            println!("replacing href");
             attrs.insert("href", format!("../{}", href));
         }
     }
