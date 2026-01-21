@@ -1,4 +1,5 @@
 use kuchiki::traits::TendrilSink;
+use kuchiki::NodeRef;
 use std::fs;
 use std::io;
 use std::io::Write;
@@ -50,10 +51,13 @@ fn build_posts(base: &str) -> io::Result<()> {
         FsAction::WriteContent {
             base: String::from(base),
             replacer: |base, content| {
-                let html_input = base
-                    .replace(r#"href="styles.css"#, r#"href="../styles.css"#)
-                    .replace("{{content}}", content);
-                highlight_code(html_input)
+                let html_input = base.replace(CONTENT_INSERTION_POINT, content);
+                let document = kuchiki::parse_html().one(html_input);
+                let document = highlight_code(document);
+                let document = fix_links(document);
+                let mut output = Vec::new();
+                document.serialize(&mut output).unwrap();
+                String::from_utf8(output).unwrap()
             },
         },
     )
@@ -100,8 +104,7 @@ enum FsAction {
     CopyFile,
 }
 
-fn highlight_code(html_input: String) -> String {
-    let document = kuchiki::parse_html().one(html_input);
+fn highlight_code(document: NodeRef) -> NodeRef {
     let code_node_refs: Vec<_> = document.select("pre > code").unwrap().collect();
 
     for code_node_ref in code_node_refs {
@@ -137,8 +140,26 @@ fn highlight_code(html_input: String) -> String {
         pre_node.insert_after(new_pre);
         pre_node.detach();
     }
+    document
+}
 
-    let mut output = Vec::new();
-    document.serialize(&mut output).unwrap();
-    String::from_utf8(output).unwrap()
+fn fix_links(document: NodeRef) -> NodeRef {
+    let nodes_with_links = match document.select(r#"[href]"#) {
+        Ok(els) => els,
+        Err(e) => panic!("{}", format!("{:?}", e)),
+    };
+    for nodes_with_links in nodes_with_links {
+        println!("found href");
+        let mut attrs = nodes_with_links.attributes.borrow_mut();
+        let href = match attrs.get("href") {
+            Some(h) => h.to_owned(),
+            None => break,
+        };
+
+        if !href.starts_with("https://") {
+            println!("replacing href");
+            attrs.insert("href", format!("../{}", href));
+        }
+    }
+    document
 }
