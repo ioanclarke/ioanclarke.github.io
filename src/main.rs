@@ -114,7 +114,7 @@ fn highlight_code(document: NodeRef) -> NodeRef {
         let raw_code = code_node.text_contents();
 
         let mut highlight_task = Command::new("node")
-            .arg("highlight.mjs")
+            .arg("src/highlight.mjs")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
