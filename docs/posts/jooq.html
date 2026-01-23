@@ -16,11 +16,11 @@
         </nav>
         <main><h1>The joys of jOOQ</h1>
 <p>
-    This is an appreciation of the excellent
-    <a href="https://www.jooq.org/" rel="noopener noreferrer" target="_blank">jOOQ</a>
-    database library for JVM langauges.
+    This is an appreciation of the excellent <a href="https://www.jooq.org/" rel="noopener noreferrer" target="_blank">jOOQ</a>
+    library for JVM langauges.
 </p>
 <p class="last-updated">Last updated: 2026-01-20</p>
+<h2>Intro</h2>
 <p>
     I love jOOQ. In case you've not heard of it, here's the elegant
     description from jOOQ's website:
@@ -28,7 +28,7 @@
     database and lets you build type safe SQL queries through its fluent API.</blockquote>
     This might be the understatement of the century. jOOQ might just be my
     favourite Java library - I use it everyday in work and after thinking about
-    it for some time, I can only come up with a single issue I have with it (more on that later).
+    it for some time, I can only come up with two issues I have with it (more on that later).
 <p></p>
 <p>
     I feel like most other database-querying libraries try to reinvent SQL for
@@ -78,25 +78,140 @@
     performance reasons or because your statement is too complex to represent
     using jOOQ, but I have never used this or seen it in any of our codebases.
 </p>
+<h2>Implicit joins</h2>
 <p>
-    In the first paragraph, I mentioned that there is an issue with jOOQ. So in
-    the interest of fairness, here it is: jOOQ offers a <code>fetchLazy()</code>
-    method for reading records from your database on demand instead of loading
-    them all into memory at once - very useful if you have a query that can
-    return a massive number of records. However, this behaviour only works if
-    you specify the fetch size before calling the method, a detail that is
+    An interesting feature of jOOQ's is the ability to forgo the explicit joining
+    of tables. After all, if I'm trying to select a book's author's name, and the
+    <code>book.author_id -&gt; author.id</code> relationship is defined in my DDL, why
+    should I need to manually type out the join? Check out these two examples:
+</p>
+<p>The traditional way to join tables:</p>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">getById</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#24292E"> id) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> dslContext</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(BOOK.NAME, AUTHOR.NAME)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">from</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">join</span><span style="color:#24292E">(AUTHOR)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">on</span><span style="color:#24292E">(BOOK.AUTHOR_ID.</span><span style="color:#6F42C1">eq</span><span style="color:#24292E">(AUTHOR.ID))</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">where</span><span style="color:#24292E">(BOOK.ID.</span><span style="color:#6F42C1">eq</span><span style="color:#24292E">(id))</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">fetchOneInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
+
+<p>The cool way to join tables😎:</p>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">getById</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#24292E"> id) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> dslContext</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(BOOK.NAME, BOOK.</span><span style="color:#6F42C1">author</span><span style="color:#24292E">().NAME)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">from</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">where</span><span style="color:#24292E">(BOOK.ID.</span><span style="color:#6F42C1">eq</span><span style="color:#24292E">(id))</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">fetchOneInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
+<p>
+    This works using jOOQ's <a href="https://www.jooq.org/doc/latest/manual/sql-building/sql-statements/select-statement/from-clause/implicit-join/" rel="noopener noreferrer" target="_blank">Implicit path JOIN</a>
+    mechanism, allowing you to use relationships you've defined to select data from where you want it. This might seem
+    like just a way to save two lines of code at first, but it's actually extremely powerful
+    when combined with the following feature.
+</p>
+<h2>Dynamic select fields</h2>
+<p>
+    Suppose you're building some kind of <a href="https://medium.com/autotrader-engineering/projection-search-introduction-3268f393bf44" rel="noopener noreferrer" target="_blank">projection search</a>
+    where the client is able to specify which of the resource's field they want returned in the response - this
+    is useful when the resource your API returns is large but some clients only care about a small subset of it.
+    jOOQ lets you do this:
+</p>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">getById</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#24292E"> id, List</span><span style="color:#D73A49">&lt;</span><span style="color:#24292E">Field</span><span style="color:#D73A49">&lt;?&gt;&gt;</span><span style="color:#24292E"> fields) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> dslContext</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">select</span><span style="color:#24292E">(fields)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">from</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">where</span><span style="color:#24292E">(BOOK.ID.</span><span style="color:#6F42C1">eq</span><span style="color:#24292E">(id))</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">fetchOneInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    // Example usage</span></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">getBookById</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#24292E"> id) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#6F42C1"> getById</span><span style="color:#24292E">(id, List.</span><span style="color:#6F42C1">of</span><span style="color:#24292E">(BOOK.ID, BOOK.TITLE, BOOK.PAGE_COUNT));</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
+<p>
+    You can probably tell that this is nicer than writing SQL strings by hand, where you'd need to do
+    string concatentation to build up your query.
+</p>
+
+<h2>Putting it together</h2>
+<p>
+    Now here's the really cool part. Imagine some of your clients care about author information while others don't.
+    If you call
+</p>
+
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">getBookById</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#24292E"> id) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#6F42C1"> getById</span><span style="color:#24292E">(id, List.</span><span style="color:#6F42C1">of</span><span style="color:#24292E">(BOOK.ID, BOOK.TITLE, BOOK.PAGE_COUNT));</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
+<p>then jOOQ will output the following SQL:</p>
+<pre>    select "book"."id", "book"."title", "book"."page_count"
+    from "book"
+    where "book"."id" = 1
+</pre>
+<p>Now if we add <code>BOOK.author().NAME.as("author")</code> to that list of fields, jOOQ outputs this:</p>
+<pre>    select
+      ""book"."title",
+      "alias_122142126"."name" as "author"
+    from (
+      "book"
+        join "author" as "alias_122142126"
+          on "book"."author_id" = "alias_122142126"."id"
+      )
+    where "book"."id" = 1
+</pre>
+<p>
+    Glossing over the funky alias that's been added, we can see jOOQ has added the join for us! This is mega.
+    We make use of this feature in our customer-data-service which has ~30 clients, all wanting slightly different
+    data. Being able to pass in the desired fields and letting jOOQ build the query saves a huge amount of complexity
+    in our code (this is contradictory to when I said jOOQ is "just" SQL, but come on, this is awesome).
+</p>
+<p>
+    You can also pass lists of <code>where</code> clauses, saving you from stitching them together by hand:
+</p>
+<pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#24292E">    Book </span><span style="color:#6F42C1">search</span><span style="color:#24292E">(List</span><span style="color:#D73A49">&lt;</span><span style="color:#24292E">Condition</span><span style="color:#D73A49">&gt;</span><span style="color:#24292E"> conditions) {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> dslContext</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">selectFrom</span><span style="color:#24292E">(BOOK)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">where</span><span style="color:#24292E">(conditions)</span></span>
+<span class="line"><span style="color:#24292E">                .</span><span style="color:#6F42C1">fetchOneInto</span><span style="color:#24292E">(Book.class);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    </span></span></code></pre>
+
+<h2>Not all sunshine and rainbows</h2>
+<p>
+    In the first paragraph, I mentioned that there are two issues with jOOQ. So in
+    the interest of fairness, here they are.
+    The first one is a biggy for some users: some databases are only supported if
+    you pay for jOOQ. The free edition of jOOQ supports most of the big players:
+    Postgres, SQLite, MySQL, H2 and many others. But some options are locked behind
+    a paywall, including Oracle and SQL Server. You can see which editions of jOOQ
+    support which databased on the <a href="https://www.jooq.org/download/support-matrix" rel="noopener noreferrer" target="_blank">Support Matrix</a>.
+</p>
+<p>
+    The other niggle involves the <code>fetchLazy()</code> method that jOOQ offers
+    for reading records from your database on demand instead of loading
+    them all into memory at once - a very useful feature if you have a query that can
+    return a massive number of records. However, it only behaves as expected if
+    you specify the fetch size before calling the method, a detail that (at least for me) is
     easy to forget. For example, if you are using Postgres and execute the following
     query, then all records will be loaded into memory at once, probably OOMing your app:
 </p>
 <pre class="shiki github-light" tabindex="0"><code><span class="line"></span>
+<span class="line"><span style="color:#6A737D">    // selectFrom(BOOK) selects all columns from the BOOK table.</span></span>
 <span class="line"><span style="color:#24292E">    Stream&lt;</span><span style="color:#D73A49">Book</span><span style="color:#24292E">&gt; books </span><span style="color:#D73A49">=</span><span style="color:#24292E"> db.</span><span style="color:#6F42C1">selectFrom</span><span style="color:#24292E">(BOOK)</span></span>
 <span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchLazy</span><span style="color:#24292E">()</span></span>
 <span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">fetchStreamInto</span><span style="color:#24292E">(Book.class);</span></span>
 <span class="line"><span style="color:#24292E">    </span></span></code></pre>
 <p>
-    Note that <code>selectFrom(BOOK)</code> selects all columns from the
-    <code>BOOK</code> table.
-</p>
+    </p>
 <p>
     To use <code>fetchLazy()</code> properly, you need to call
     <code>fetchSize(int)</code>
@@ -120,14 +235,17 @@
         <code>Settings.setFetchSize(Integer)</code> prior to calling this method.
     </blockquote>
 <p></p>
-<p>
-    It's worth mentioning that jOOQ does require payment for certain types of databases,
-    but the edition that supports Postgres is free.
-</p>
+<h2>Wrapping up</h2>
 <p>
     So that's it. Next time you spin up an application with a database, try using jOOQ
-    (see <a href="https://www.jooq.org/javadoc/latest/org.jooq/org/jooq/SQLDialect.html" rel="noopener noreferrer" target="_blank">the org.jooq.SQLDialect javadoc</a> for the list of supported dialects).
+    (see <a href="https://www.jooq.org/javadoc/latest/org.jooq/org/jooq/SQLDialect.html" rel="noopener noreferrer" target="_blank">the org.jooq.SQLDialect javadoc</a>
+    for the list of supported dialects).
 </p>
+
+<h3>TODO</h3>
+<ul>
+    <li>Add example of how to implement code generation</li>
+</ul>
 </main>
     
 

@@ -1,6 +1,7 @@
 alias d := deploy
 
 dev:
+    @just build
     @open ./docs/index.html
     @echo 'Watching for changes in ./public'
     @find public -type f | entr -s 'just create'

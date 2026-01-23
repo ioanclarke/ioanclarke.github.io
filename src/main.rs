@@ -54,7 +54,8 @@ fn build_posts(base: &str) -> io::Result<()> {
                 let html_input = base.replace(CONTENT_INSERTION_POINT, content);
                 let document = kuchiki::parse_html().one(html_input);
                 let document = highlight_code(document);
-                let document = fix_links(document);
+                let document = fix_relative_links(document);
+                let document = make_external_links_safe(document);
                 let mut output = Vec::new();
                 document.serialize(&mut output).unwrap();
                 String::from_utf8(output).unwrap()
@@ -143,9 +144,9 @@ fn highlight_code(document: NodeRef) -> NodeRef {
     document
 }
 
-fn fix_links(document: NodeRef) -> NodeRef {
-    for nodes_with_links in document.select(r#"[href]"#).unwrap() {
-        let mut attrs = nodes_with_links.attributes.borrow_mut();
+fn fix_relative_links(document: NodeRef) -> NodeRef {
+    for link in document.select(r#"[href]"#).unwrap() {
+        let mut attrs = link.attributes.borrow_mut();
         let href = match attrs.get("href") {
             Some(h) => h.to_owned(),
             None => break,
@@ -154,6 +155,27 @@ fn fix_links(document: NodeRef) -> NodeRef {
         if !href.starts_with("https://") {
             attrs.insert("href", format!("../{}", href));
         }
+    }
+    document
+}
+
+fn make_external_links_safe(document: NodeRef) -> NodeRef {
+    for link in document.select("a[href]").unwrap() {
+        let mut attrs = link.attributes.borrow_mut();
+
+        let href = match attrs.get("href") {
+            Some(h) => h,
+            None => continue,
+        };
+
+        let is_external = href.starts_with("https://") || href.starts_with("http://");
+
+        if !is_external {
+            continue;
+        }
+
+        attrs.insert("target", String::from("_blank"));
+        attrs.insert("rel", String::from("noopener noreferrer"));
     }
     document
 }
